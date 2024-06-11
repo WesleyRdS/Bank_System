@@ -10,9 +10,19 @@
     <body>
         <div id="title">CBB</div>
         <div id="form_background">
-            <H1>Sing Up</H1>
+            <H1>Opções</H1>
             <div id="form_front">
-                
+                <p id="balance_text">Saldo</p>
+                <div id="balance_field">{{response}}</div>
+                <form action="/transation_route">
+                    <button type="submit" id="btn_transation">Transferência</button>
+                </form>
+                <form action="/deposit_route">
+                    <button type="submit" id="btn_deposit">Deposito</button>
+                </form>
+                <form action="/logout">
+                    <button type="submit" id="btn_logout">X</button>
+                </form>
             </div>
         </div>
     </body>

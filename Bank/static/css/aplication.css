@@ -1,0 +1,114 @@
+@charset "UTF-8";
+div.flash_alert{
+    background-color: red;
+    font-size: 50px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-align: center;
+}
+
+
+body{
+    background-color: black;
+    background: url(../images/background.jpg) no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    display: block;
+}
+/* # is id*/
+div#title{
+    margin: 30px;
+    text-align: center;
+    border-radius: 20px;
+    font-weight: bold;
+    padding: 10px;
+    color: white;
+    font-size: 80px;
+}
+
+div#form_background{
+    background-color: white;
+    margin: 5% 35% 35% 35%;
+    text-align: center;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+div#form_front{
+    background-color: black;
+    margin: 10px;
+    text-align: center;
+    border-radius: 20px;
+    font-weight: bold;
+    padding: 10px;
+    color: white;
+
+}
+
+#balance_text{
+    background-color: white;
+    margin: 1% 30% 1% 30%;
+    text-align: center;
+    font-size: 30px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+}
+
+div#balance_field{
+    background-color: greenyellow;
+    margin: 5px;
+    text-align: center;
+    border-radius: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    padding: 5px;
+    margin-bottom: 5px;
+    color: white;
+}
+
+button#btn_logout{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    border-radius: 20px;
+    background-color: white;
+    color: black;
+}
+
+button#btn_logout:hover{
+    background-color: rgb(255, 71, 47);
+    color: white;
+    font-size: 25px;
+}
+
+
+button#btn_deposit{
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 20px;
+    background-color: white;
+    color: black;
+}
+
+
+button#btn_deposit:hover{
+    background-color: greenyellow;
+    color: white;
+    font-size: 40px;
+}
+
+button#btn_transation{
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 20px;
+    background-color: white;
+    color: black;
+}
+
+
+button#btn_transation:hover{
+    background-color: greenyellow;
+    color: white;
+    font-size: 40px;
+}

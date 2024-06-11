@@ -312,7 +312,12 @@ def login_page():
 @app.route('/home')
 def home():
     if 'logged_in' in session:
-        return session['cpf']
+        balance = ''
+        data = load_data()
+        for acc in data[session['cpf']]:
+            if acc['account'] == session['account'] and acc['agency'] == session['agency']:
+                balance = acc['balance']
+        return render_template('aplication.html', response=balance)
     else:
         return render_template('login.html')
 
