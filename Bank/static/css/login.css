@@ -7,7 +7,7 @@ body{
     background-attachment: fixed;
     display: block;
 }
-
+/* # is id*/
 div#title{
     margin: 30px;
     text-align: center;
@@ -16,6 +16,14 @@ div#title{
     padding: 10px;
     color: white;
     font-size: 80px;
+}
+/* . is class*/
+div.flash_alert{
+    background-color: red;
+    font-size: 50px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-align: center;
 }
 
 div#form_background{

@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, jsonify, render_template, redirect
+from flask import Flask, make_response, request, jsonify, render_template, redirect, flash
 from werkzeug.serving import run_simple
 import os
 import threading
@@ -6,7 +6,7 @@ import json
 import requests
 
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
+app.config['SECRET_KEY'] = "CONCORRENCIA"
 IP = os.getenv("IP")
 
 class bank:
@@ -81,6 +81,9 @@ def send_value_to_destination(from_identificator,from_agency, from_account,
                     if  data[current_transaction['from_identificator']][itarator]['account'] == current_transaction['from_account']:
                         data[current_transaction['from_identificator']][itarator]['balance'] = int(data[current_transaction['from_identificator']][itarator]['balance']) - int(value)
                         save_data(data)
+                        if data[current_transaction['from_identificator']][itarator]['type'] == "CC":
+                            data = look_for_joint_account(from_agency, from_account,'balance',data[from_identificator][itarator]['balance'])
+                            save_data(data)
                         break
                 break
         for client in data[current_transaction['to_identificator']]:
@@ -89,6 +92,9 @@ def send_value_to_destination(from_identificator,from_agency, from_account,
                     if  data[current_transaction['to_identificator']][itarator]['account'] == current_transaction['to_account']:
                         data[current_transaction['to_identificator']][itarator]['balance'] = int(data[current_transaction['to_identificator']][itarator]['balance']) + int(value)
                         save_data(data)
+                        if data[current_transaction['to_identificator']][itarator]['type'] == "CC":
+                            data = look_for_joint_account(to_agency, to_account,'balance',data[to_identificator][itarator]['balance'])
+                            save_data(data)
                         response = to_att_consortium()
                         break
                 break
@@ -98,6 +104,9 @@ def send_value_to_destination(from_identificator,from_agency, from_account,
                     if  data[current_transaction['from_identificator']][itarator]['account'] == current_transaction['from_account']:
                         data[current_transaction['from_identificator']][itarator]['status'] = 'Unlocked'
                         save_data(data)
+                        if data[current_transaction['from_identificator']][itarator]['type'] == "CC":
+                            data = look_for_joint_account(from_agency, from_account,'status','Unlocked')
+                            save_data(data)
                         to_att_consortium()
                         return "Transação realizada com sucesso!!!"
                 
@@ -109,10 +118,24 @@ def send_value_to_destination(from_identificator,from_agency, from_account,
                         data[current_transaction['from_identificator']][itarator]['balance'] = int(data[current_transaction['from_identificator']]['balance']) + int(value)
                         data[current_transaction['from_identificator']][itarator]['status'] = 'Unlocked'
                         save_data(data)
+                        if data[current_transaction['from_identificator']][itarator]['type'] == "CC":
+                            data = look_for_joint_account(from_agency, from_account,'balance',data[from_identificator][itarator]['balance'])
+                            save_data(data)
+                            data = look_for_joint_account(from_agency, from_account,'status','Unlocked')
+                            save_data(data)
                         to_att_consortium()
                         return "Transação falhou!!!"
     return "Algo deu errado"
         
+def look_for_joint_account(agency, account,element,value):
+    data = load_data()
+    for identificator in data:
+        print("Atual id:" + identificator)
+        print("Atual valor:" + str(value))
+        for search_cc in range(len(data[identificator])):
+            if data[identificator][search_cc]['account'] == account and data[identificator][search_cc]['agency'] == agency and data[identificator][search_cc]['type'] == 'CC':
+                data[identificator][search_cc][element] = value
+    return data
 
 #Send atualized consortium data from the others banks
 def to_att_consortium():
@@ -138,16 +161,65 @@ def to_att_consortium():
                 response_list.append(bank.get_agency())
     return response_list
 
+def cadastrate(account, name, identificator,type_account):
+    data = load_data()
+    registered_client = False
+    if identificator not in data: #checking if the CPF/CNPJ does not exists in the file
+        new_identificator = {
+            identificator: [
+                {
+                    'name': name,
+                    'agency': bank.get_agency(),
+                    'account': account,
+                    'balance': 0,
+                    'status': "Unlocked",
+                    'type': type_account
+                }
+            ]
+        }
+        #Adding new cpf/cnpf in data
+        data.update(new_identificator)
+        #save data
+        save_data(data)
+        to_att_consortium()
+        return "Cliente cadastrado com sucesso"
+
+    #if it exists
+    else:
+        for client in data[identificator]:
+            if client['account'] == bank.get_agency():
+                registered_client = True
+                break
+        if registered_client:
+            return "Cliente já cadastrado"
+        else:
+            data[identificator].append({
+                'name': name,
+                'agency': bank.get_agency(),
+                'account': account,
+                'balance': 0,
+                'status': "Unlocked",
+                'type': type_account
+            })
+            #save data
+            save_data(data)
+            to_att_consortium()
+            return "Cliente cadastrado com sucesso"
+
+#This function has the purpose of generating a password from unique identification numbers such as cpf and cnpj
 def generate_password(identificator):
-    form = identificator.replace('-','.')
-    three = form.split('.')
+    form = identificator.replace('-','.') #change the symbol - to .
+    three = form.split('.')#transform the string an a array delimited by .
     group = [int(part) for part in three]
     password = []
+    #Main loop that transforms groups of hundreds places starting counting from 0 into letters of the alphabet 
     for number in group:
         if 0 <= number <= 99:
+            # + a number that can be 0 when dividing that number by 10 and having a whole number
             if number == 0 or number % 10 == 0:
-                digit = number // 10
+                digit = number // 10 
             else:
+                # or the remainder of the division in case of fractional results.
                 digit = number % 10
             password.append(f"A{digit}")
         elif 100 <= number <= 199:
@@ -204,16 +276,17 @@ def generate_password(identificator):
             else:
                 digit = number % 10
             password.append(f"J{digit}")
-    
+    #return a string formed by adding array items
     return ''.join(password)
 
 
 
-
+#Main page
 @app.route('/')
 def home():
     return render_template('login.html')
 
+#login route
 @app.route('/login', methods=['POST'])
 def login():
     agency = request.form.get('agency')
@@ -222,10 +295,11 @@ def login():
     data = load_data()
     for itarator in data:
         pass_password = generate_password(itarator)
-        if pass_password == password:
+        if pass_password == password:#check if the primarykey transformation generate this password
             for check in data[itarator]:
-                if check['account'] == account and check['agency'] == agency:
+                if check['account'] == account and check['agency'] == agency:#search account
                     return render_template('aplication.html')
+    flash("Conta, agência ou senha invalidos!!!")
     return app.redirect('/')
 
 #route to atualizate the consortium data for the others banks
@@ -235,60 +309,34 @@ def from_att_consortium():
     save_data(data)
     return bank.get_agency()
 
-#create new account route
-@app.route('/sing_up/<account>/<name>/<identificator>')
-def sing_up_manager(account, name, identificator):
-    data = load_data()
-    registered_client = False
-    if identificator not in data: #checking if the CPF/CNPJ does not exists in the file
-        new_identificator = {
-            identificator: [
-                {
-                    'name': name,
-                    'agency': bank.get_agency(),
-                    'account': account,
-                    'balance': 0,
-                    'status': "Unlocked"
-                }
-            ]
-        }
-        #Adding new cpf/cnpf in data
-        data.update(new_identificator)
-        #save data
-        save_data(data)
-        to_att_consortium()
-        return "Cliente cadastrado com sucesso"
 
-    #if it exists
+
+#create new account route
+@app.route('/sing_up/<account>/<name>/<identificator>/<type_account>')
+def sing_up_manager(account, name, identificator,type_account):
+    list_singup = []
+    if type_account == "CC":
+        array_counts = identificator.split('@')
+        for primaryKey in array_counts:
+            output = cadastrate(account, name, primaryKey,type_account)
+            list_singup.append(output)
+        return list_singup
     else:
-        for client in data[identificator]:
-            if client['account'] == bank.get_agency():
-                registered_client = True
-                break
-        if registered_client:
-            return "Cliente já cadastrado"
-        else:
-            data[identificator].append({
-                'name': name,
-                'agency': bank.get_agency(),
-                'account': account,
-                'balance': 0,
-                'status': "Unlocked"
-            })
-            #save data
-            save_data(data)
-            to_att_consortium()
-            return "Cliente cadastrado com sucesso"
+        return cadastrate(account, name, identificator,type_account)
+
 
 #direct deposit route 
 @app.route("/deposit/<agency>/<account>/<identificator>/<value>")
 def deposit(agency, account, identificator,value):
     data = load_data()
-    for conta in range(0,len(data[identificator])):
-        in_data = data[identificator][conta] #banks account getter 
+    for acc in range(0,len(data[identificator])):
+        in_data = data[identificator][acc] #banks account getter 
         #verify if a client is the targent searched
         if (in_data['agency'] == agency) and (in_data['account'] == account):
-            data[identificator][conta]['balance'] = int(in_data['balance']) + int(value)
+            data[identificator][acc]['balance'] = int(in_data['balance']) + int(value)
+            if in_data['type'] == "CC":
+                data = look_for_joint_account(agency, account,'balance',data[identificator][acc]['balance'])
+
             save_data(data)
             to_att_consortium()
             return "Foi depoisitado R$" + value + " na sua conta -- Agencia: " + agency 
@@ -306,6 +354,9 @@ def check_balance(from_identificator,from_agency, from_account,
                 for search in range(len(data[from_identificator])):
                     if data[from_identificator][search]['account'] == from_account:
                         data[from_identificator][search]['status'] = "Locked"
+                        if data[from_identificator][search]['type'] == "CC":
+                            data = look_for_joint_account(from_agency, from_account,'status','Locked')
+                            save_data(data)
                 save_data(data)
                 return send_value_to_destination(from_identificator,from_agency, from_account, 
                               to_identificator, to_agency, to_account, value)
