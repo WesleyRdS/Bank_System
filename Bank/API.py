@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, jsonify
+from flask import Flask, make_response, request, jsonify, render_template, redirect
 from werkzeug.serving import run_simple
 import os
 import threading
@@ -114,10 +114,6 @@ def send_value_to_destination(from_identificator,from_agency, from_account,
     return "Algo deu errado"
         
 
-
-
-
-
 #Send atualized consortium data from the others banks
 def to_att_consortium():
     consortium_list = load_data()
@@ -141,6 +137,96 @@ def to_att_consortium():
             else:
                 response_list.append(bank.get_agency())
     return response_list
+
+def generate_password(identificator):
+    form = identificator.replace('-','.')
+    three = form.split('.')
+    group = [int(part) for part in three]
+    password = []
+    for number in group:
+        if 0 <= number <= 99:
+            if number == 0 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"A{digit}")
+        elif 100 <= number <= 199:
+            if number == 100 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"B{digit}")
+        elif 200 <= number <= 299:
+            if number == 200 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"C{digit}")
+        elif 300 <= number <= 399:
+            if number == 300 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"D{digit}")
+        elif 400 <= number <= 499:
+            if number == 400 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"E{digit}")
+        elif 500 <= number <= 599:
+            if number == 500 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"F{digit}")
+        elif 600 <= number <= 699:
+            if number == 600 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"G{digit}")
+        elif 700 <= number <= 799:
+            if number == 700 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"H{digit}")
+        elif 800 <= number <= 899:
+            if number == 800 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"I{digit}")
+        elif 900 <= number <= 999:
+            if number == 900 or number % 10 == 0:
+                digit = number // 10
+            else:
+                digit = number % 10
+            password.append(f"J{digit}")
+    
+    return ''.join(password)
+
+
+
+
+@app.route('/')
+def home():
+    return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    agency = request.form.get('agency')
+    account = request.form.get('account')
+    password = request.form.get('password')
+    data = load_data()
+    for itarator in data:
+        pass_password = generate_password(itarator)
+        if pass_password == password:
+            for check in data[itarator]:
+                if check['account'] == account and check['agency'] == agency:
+                    return render_template('aplication.html')
+    return app.redirect('/')
 
 #route to atualizate the consortium data for the others banks
 @app.route('/from_att_consortium')
