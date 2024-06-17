@@ -54,9 +54,11 @@ document.addEventListener("DOMContentLoaded",
         function to_hide_botton(){
             if(type_account[0].checked){
                 add_cpf_button.style.display = 'none';
+                ADD_cpf_forms_dynamic.style.display = 'none';
             }
             else if(type_account[1].checked){
                 add_cpf_button.style.display = 'block';
+                ADD_cpf_forms_dynamic.style.display = 'block';
             }
         }
 

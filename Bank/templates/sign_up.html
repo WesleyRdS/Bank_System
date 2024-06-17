@@ -34,15 +34,16 @@
                         <label for="type_account">Tipo de conta:</label>
                         <label class="radio-label"><input type="radio" name="type_account" value="CP" checked> Pessoal</label>
                         <label class="radio-label"><input type="radio" name="type_account" value="CC"> Conjunta</label>
+                        <div id="cpf_forms_dynamic" style="display: none;">
+                            <!--Automatically generated cpf inputs -->
+                        </div>
+                        <div class="form-group" id="add_cpf_button" style="display: none;">
+                            <button type="button" id="add_cpf">+</button>
+                        </div>
                     </div>
-                    <div id="cpf_forms_dynamic">
-                        <!--Automatically generated cpf inputs -->
-                    </div>
-                    <div class="form-group" id="add_cpf_button" style="display: none;">
-                        <button type="button" id="add_cpf">+</button>
-                    </div>
+                   
                     <div class="form_group" id="agency_field">
-                        <label for="cpf">AG:</label>
+                        <label for="agency">AG:</label>
                         <input type="text" id="agency" name="agency" pattern="\d{3}\.\d{3}\.\d{3}.\d{3}" placeholder="000.000.000.000" required>
                     </div>
                     <button type="submit" id="btn_sign_up">Criar conta</button>
