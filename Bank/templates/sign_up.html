@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up Consortium</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sign_up.css') }}">
+</head>
+<body>
+    <div id="title">CBB</div>
+        <div id="form_background">
+            <H1>Sign Up</H1>
+            <div id="form_front">
+                <form action="/sing_up" id="sing_up" method="post">
+                    <div class="form_group" id="agency_field">
+                        <label for="client">Nome:</label>
+                        <input type="text" id="client" name="client" placeholder="Barney Stinson" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="identifier">Conta para pessoa do tipo:</label>
+                        <label class="radio-label"><input type="radio" name="identifier" value="cpf" checked> Fisica</label>
+                        <label class="radio-label"><input type="radio" name="identifier" value="cnpj"> Juridica</label>
+                    </div>
+                    <div class="form_group" id="cpf_field">
+                        <label for="cpf">CPF:</label>
+                        <input type="text" id="cpf" name="cpf" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00" required>
+                        
+                    </div>
+                    <div class="form_group" id="cnpj_field" style="display: none;">
+                        <label for="cnpj">CNPJ:</label>
+                        <input type="text" id="cnpj" name="cnpj" pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}" placeholder="00.000.000/0000-00" required>
+                    </div>
+                    <div class="form-group" id="label_type_account" style="display: none;">
+                        <label for="type_account">Tipo de conta:</label>
+                        <label class="radio-label"><input type="radio" name="type_account" value="CP" checked> Pessoal</label>
+                        <label class="radio-label"><input type="radio" name="type_account" value="CC"> Conjunta</label>
+                    </div>
+                    <div id="cpf_forms_dynamic">
+                        <!--Automatically generated cpf inputs -->
+                    </div>
+                    <div class="form-group" id="add_cpf_button" style="display: none;">
+                        <button type="button" id="add_cpf">+</button>
+                    </div>
+                    <div class="form_group" id="agency_field">
+                        <label for="cpf">AG:</label>
+                        <input type="text" id="agency" name="agency" pattern="\d{3}\.\d{3}\.\d{3}.\d{3}" placeholder="000.000.000.000" required>
+                    </div>
+                    <button type="submit" id="btn_sign_up">Criar conta</button>
+                    
+                </form>
+            </div>
+        </div>
+
+        <script src="../static/scripts/sign_up.js"></script>
+</body>
+</html>

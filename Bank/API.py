@@ -348,11 +348,14 @@ def from_att_consortium():
     save_data(data)
     return bank.get_agency()
 
+@app.route('/sign_up')
+def sign_up():
+    return render_template('sign_up.html')
 
 
 #create new account route
-@app.route('/sing_up/<account>/<name>/<identificator>/<type_account>')
-def sing_up_manager(account, name, identificator,type_account):
+@app.route('/sign_up/<account>/<name>/<identificator>/<type_account>')
+def sign_up_manager(account, name, identificator,type_account):
     list_singup = []
     if type_account == "CC":
         array_counts = identificator.split('@')
