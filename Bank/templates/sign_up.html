@@ -7,11 +7,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sign_up.css') }}">
 </head>
 <body>
+    {% set notification = get_flashed_messages() %}
+    {% if notification %}
+        <div class="flash_alert">
+            {{notification[0]}}
+        </div>
+    {% endif %}
     <div id="title">CBB</div>
         <div id="form_background">
             <H1>Sign Up</H1>
             <div id="form_front">
-                <form action="/sing_up" id="sing_up" method="post">
+                <form action="/add_user" id="sing_up" method="post">
                     <div class="form_group" id="agency_field">
                         <label for="client">Nome:</label>
                         <input type="text" id="client" name="client" placeholder="Barney Stinson" required>
@@ -37,6 +43,7 @@
                         <div id="cpf_forms_dynamic" style="display: none;">
                             <!--Automatically generated cpf inputs -->
                         </div>
+                        
                         <div class="form-group" id="add_cpf_button" style="display: none;">
                             <button type="button" id="add_cpf">+</button>
                         </div>
@@ -45,9 +52,13 @@
                     <div class="form_group" id="agency_field">
                         <label for="agency">AG:</label>
                         <input type="text" id="agency" name="agency" pattern="\d{3}\.\d{3}\.\d{3}.\d{3}" placeholder="000.000.000.000" required>
-                    </div>
+                    </div><br>
                     <button type="submit" id="btn_sign_up">Criar conta</button>
+            
                     
+                </form><br>
+                <form action="/">
+                    <button type="submit" id="btn_login">Login</button>
                 </form>
             </div>
         </div>

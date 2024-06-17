@@ -62,17 +62,31 @@ input:focus{
     background-color: yellow;
 }
 
-button{
-    margin-top: 30px;
-    font-size: 50px;
+button#btn_login{
+    margin-top: 10px;
+    font-size: 30px;
     font-weight: bold;
     border-radius: 20px;
     background-color: white;
     color: black;
 }
 
-button:hover{
+button#btn_logout{
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 20px;
+    background-color: white;
+    color: black;
+}
+
+button#btn_logout:hover{
     background-color: greenyellow;
     color: white;
-    font-size: 60px;
+    font-size: 40px;
+}
+
+button#btn_login:hover{
+    background-color: greenyellow;
+    color: white;
+    font-size: 40px;
 }

@@ -1,4 +1,4 @@
-from flask import Flask, make_response, request, jsonify, render_template, redirect, flash, session
+from flask import Flask, make_response, request, jsonify, render_template, redirect, flash, session, Response
 from werkzeug.serving import run_simple
 import os
 import threading
@@ -15,9 +15,16 @@ class bank:
         self.consortium = []
         self.transaction_queue = []
         self.agency = IP
+        self.accounts = []
         self.status_transaction = "Locked"
     
     #bank informations
+    def get_account(self):
+        return len(self.accounts)
+    
+    def set_account(self,data):
+        self.accounts.append(data)
+
     def set_name(self, name):
         self.name = name
 
@@ -183,7 +190,8 @@ def cadastrate(account, name, identificator,type_account):
         #save data
         save_data(data)
         to_att_consortium()
-        return "Cliente cadastrado com sucesso"
+        
+        return "/account_information/Agencia: "+str(bank.get_agency())+"   Conta: "+account+"  Senha: "+generate_password(identificator)
 
     #if it exists
     else:
@@ -192,7 +200,8 @@ def cadastrate(account, name, identificator,type_account):
                 registered_client = True
                 break
         if registered_client:
-            return "Cliente já cadastrado"
+            flash("Esta conta já existe!!")
+            return app.redirect('/sign_up')
         else:
             data[identificator].append({
                 'name': name,
@@ -206,7 +215,8 @@ def cadastrate(account, name, identificator,type_account):
             #save data
             save_data(data)
             to_att_consortium()
-            return "Cliente cadastrado com sucesso"
+            
+            return "/account_information/Agencia: "+str(bank.get_agency())+"   Conta: "+account+"  Senha: "+generate_password(identificator)
 
 #This function has the purpose of generating a password from unique identification numbers such as cpf and cnpj
 def generate_password(identificator):
@@ -281,7 +291,11 @@ def generate_password(identificator):
     #return a string formed by adding array items
     return ''.join(password)
 
-
+def account_generate():
+    num = bank.get_account()
+    form = bank.get_agency().replace('.',str(num))
+    bank.set_account(form)
+    return form
 
 #Main page
 @app.route('/')
@@ -353,16 +367,56 @@ def sign_up():
     return render_template('sign_up.html')
 
 
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    name = request.form.get('client')
+    agency = request.form.get('agency')
+    identifier = request.form.get('identifier')
+    if identifier == "cpf":
+        cpf = request.form.get('cpf')
+        type_account = request.form.get('type_account')
+        if type_account == "CC":
+            cpf_cc = cpf
+            aux_cpf = request.form.get('cpf1')
+            aux_name = request.form.get('client1')
+            index = 1
+            while aux_cpf != None:
+                cpf_cc = cpf_cc+'@'+aux_cpf
+                name = name+'@'+aux_name
+                index += 1
+                aux_cpf = request.form.get('cpf'+str(index))  
+            account = account_generate()
+            return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cpf_cc+"/"+type_account)
+        else:
+            pass
+    else:
+        pass
+    return identifier
+
+@app.route("/account_information/<data>")
+def account_information_singup(data):
+    response = Response(
+        data,
+        content_type='text/plain',
+    )
+    # Nome do arquivo sugerido para download
+    response.headers['Content-Disposition'] = 'attachment; filename=account_information.txt'
+
+    return response
+
 #create new account route
 @app.route('/sign_up/<account>/<name>/<identificator>/<type_account>')
 def sign_up_manager(account, name, identificator,type_account):
     list_singup = []
     if type_account == "CC":
         array_counts = identificator.split('@')
-        for primaryKey in array_counts:
-            output = cadastrate(account, name, primaryKey,type_account)
+        name_counts = name.split('@')
+        for primaryKey, nameKey in zip(array_counts,name_counts):
+            output = cadastrate(account, nameKey, primaryKey,type_account)
             list_singup.append(output)
-        return list_singup
+        return app.redirect(list_singup[0])
+            
+                
     else:
         return cadastrate(account, name, identificator,type_account)
 
