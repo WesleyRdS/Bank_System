@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded",
         //joint account blocks 
         var label_type_account = document.getElementById("label_type_account");
         var ADD_cpf_forms_dynamic = document.getElementById("cpf_forms_dynamic");
-        var ADD_name_forms_dynamic = document.getElementById("name_forms_dynamic");
+        var remove_cpf = document.getElementById("remove_cpf");
         var add_cpf = document.getElementById("add_cpf");
         var cpf_index = 1;
         var type_account = document.getElementsByName("type_account");
@@ -68,6 +68,14 @@ document.addEventListener("DOMContentLoaded",
             }
         );
       
+        remove_cpf.addEventListener("click", function(){
+            if(cpf_index > 1){
+                ADD_cpf_forms_dynamic.removeChild(ADD_cpf_forms_dynamic.lastChild);
+                cpf_index--;
+            } else{
+                alert("Não é possivel remover mais campos!!!");
+            }
+        });
 
         //verify field in exibition
         function to_hide_field(){

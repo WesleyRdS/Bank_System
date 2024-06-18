@@ -16,9 +16,14 @@ class bank:
         self.transaction_queue = []
         self.agency = IP
         self.accounts = []
+        self.joints  = []
         self.status_transaction = "Locked"
     
     #bank informations
+    def get_joints(self):
+        return self.joints
+    def set_joints(self,data):
+        self.joints.append(data)
     def get_account(self):
         return len(self.accounts)
     
@@ -195,13 +200,13 @@ def cadastrate(account, name, identificator,type_account):
 
     #if it exists
     else:
-        for client in data[identificator]:
-            if client['account'] == bank.get_agency():
+        for mark_cpf in data[identificator]:
+            if mark_cpf["type"] == "CP" and type_account == "CP":
                 registered_client = True
                 break
         if registered_client:
             flash("Esta conta já existe!!")
-            return app.redirect('/sign_up')
+            return "/sign_up"
         else:
             data[identificator].append({
                 'name': name,
@@ -388,10 +393,12 @@ def add_user():
             account = account_generate()
             return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cpf_cc+"/"+type_account)
         else:
-            pass
+            account = account_generate()
+            return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cpf+"/"+type_account)
     else:
-        pass
-    return identifier
+        cnpj = request.form.get('cnpj')
+        account = account_generate()
+        return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cnpj+"/PJ")
 
 @app.route("/account_information/<data>")
 def account_information_singup(data):
@@ -409,6 +416,11 @@ def account_information_singup(data):
 def sign_up_manager(account, name, identificator,type_account):
     list_singup = []
     if type_account == "CC":
+        for users in bank.get_joints():
+            if users == identificator:
+                flash("Essa conta ja esta cadastrada")
+                return app.redirect("/sign_up")
+        bank.set_joints(identificator)
         array_counts = identificator.split('@')
         name_counts = name.split('@')
         for primaryKey, nameKey in zip(array_counts,name_counts):
@@ -418,7 +430,10 @@ def sign_up_manager(account, name, identificator,type_account):
             
                 
     else:
-        return cadastrate(account, name, identificator,type_account)
+        resp = cadastrate(account, name, identificator,type_account)
+        if resp == "/sign_up":
+            flash("Essa conta ja esta cadastrada")
+        return app.redirect(resp)
 
 
 #direct deposit route 
