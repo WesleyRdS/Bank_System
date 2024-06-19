@@ -34,6 +34,7 @@ div#form_front{
     font-weight: bold;
     padding: 10px;
     color: white;
+    font-size: 15px;
 
 }
 
@@ -103,4 +104,20 @@ div.flash_alert{
     border-radius: 30px;
     font-weight: bold;
     text-align: center;
+}
+
+div.flash_confirmation{
+    background-color: greenyellow;;
+    font-size: 50px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-align: center;
+}
+
+
+
+input{
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: bold;
 }

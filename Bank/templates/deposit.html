@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Consortium</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/deposit.css') }}">
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'alert' %}
+                        <div class="flash_alert">
+                            {{ message }}
+                        </div>
+                    {% elif category == 'confirmation' %}
+                        <div class="flash_confirmation">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+    <div id="title">CBB</div>
+        <div id="form_background">
+            <H1>Depositar</H1>
+            <div id="form_front">
+                <form action="/deposit_route" method="post">
+                    <div class="form_group" id="account_field">
+                        <label for="account">Conta:</label>
+                        <input type="text" id="account" name="account" placeholder="Digite a conta" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="identifier">Conta para pessoa do tipo:</label>
+                        <label class="radio-label"><input type="radio" name="identifier" value="cpf" checked> Fisica</label>
+                        <label class="radio-label"><input type="radio" name="identifier" value="cnpj"> Juridica</label>
+                    </div>
+                    <div class="form_group" id="cpf_field">
+                        <label for="cpf" id="idp">CPF:</label>
+                        <input type="text" id="cpf" name="cpf" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00" required>
+                        
+                    </div>
+                    <div class="form_group" id="cnpj_field" style="display: none;">
+                        <label for="cnpj" id="idp">CNPJ:</label>
+                        <input type="text" id="cnpj" name="cnpj" pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}" placeholder="00.000.000/0000-00" required>
+                    </div>
+                    <div class="form_group" id="account_field">
+                        <label for="value">Conta:</label>
+                        <input type="text" id="value" name="value" placeholder="Digite o valor que deseja depositar" required>
+                    </div>
+                    <button type="submit" id="btn_deposit">Depositar</button>
+                </form>
+                <form action="/aplication_back">
+                    <button type="submit" id="btn_back_aplication">Voltar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="../static/scripts/deposit.js"></script>
+</body>
+</html>

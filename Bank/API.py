@@ -205,7 +205,7 @@ def cadastrate(account, name, identificator,type_account):
                 registered_client = True
                 break
         if registered_client:
-            flash("Esta conta já existe!!")
+            flash("Esta conta já existe!!", "alert")
             return "/sign_up"
         else:
             data[identificator].append({
@@ -316,7 +316,7 @@ def home():
         data = load_data()
         for acc in data[session['cpf']]:
             if acc['account'] == session['account'] and acc['agency'] == session['agency']:
-                balance = acc['balance']
+                balance = {"agency":session['agency'], "account": session['account'], "balance": acc['balance']}
         return render_template('aplication.html', response=balance)
     else:
         return render_template('login.html')
@@ -361,8 +361,8 @@ def login():
                             to_att_consortium()
                     return app.redirect('/home')
                 elif check['session'] == True:
-                    flash("Esta conta ja se encontra logada em outro dispositivo!!!")
-    flash("Conta, agência ou senha invalidos!!!")
+                    flash("Esta conta ja se encontra logada em outro dispositivo!!!","alert")
+    flash("Conta, agência ou senha invalidos!!!","alert")
     return app.redirect('/')
 
 #route to atualizate the consortium data for the others banks
@@ -423,7 +423,7 @@ def sign_up_manager(account, name, identificator,type_account):
     if type_account == "CC":
         for users in bank.get_joints():
             if users == identificator:
-                flash("Essa conta ja esta cadastrada")
+                flash("Essa conta ja esta cadastrada","alert")
                 return app.redirect("/sign_up")
         bank.set_joints(identificator)
         array_counts = identificator.split('@')
@@ -437,11 +437,46 @@ def sign_up_manager(account, name, identificator,type_account):
     else:
         resp = cadastrate(account, name, identificator,type_account)
         if resp == "/sign_up":
-            flash("Essa conta ja esta cadastrada")
+            flash("Essa conta ja esta cadastrada","alert")
         return app.redirect(resp)
 
+@app.route("/aplication_back")
+def aplication_back():
+    if 'logged_in' in session:
+        return app.redirect("/home")
+    else:
+        return render_template('login.html')
 
-#direct deposit route 
+#direct deposit route
+@app.route("/deposit")
+def deposit_route(): 
+    if 'logged_in' in session:
+        return render_template('deposit.html')
+    else:
+        return render_template('login.html')
+
+@app.route("/deposit_route", methods=['POST'])
+def deposit_middleware(): 
+    if 'logged_in' in session:
+        account = request.form.get('account')
+        
+        document = request.form.get('identifier')
+        if document == "cpf":
+            identifier = request.form.get('cpf')
+        else:
+            identifier = request.form.get('cnpj')
+        value = request.form.get('value')
+        data = load_data()
+        for client in data[identifier]:
+            if client["agency"] == session['agency'] and client["account"] == account:
+                return app.redirect("/deposit/"+client["agency"]+"/"+account+"/"+identifier+"/"+value)
+            else:
+                pass
+        flash("Essa conta não existe!!","alert")
+        return app.redirect("/deposit")
+    else:
+        return render_template('login.html')
+
 @app.route("/deposit/<agency>/<account>/<identificator>/<value>")
 def deposit(agency, account, identificator,value):
     if 'logged_in' in session:
@@ -456,8 +491,10 @@ def deposit(agency, account, identificator,value):
 
                 save_data(data)
                 to_att_consortium()
-                return "Foi depoisitado R$" + value + " na sua conta -- Agencia: " + agency 
-        return "Esta conta não existe"
+                flash("Foi depoisitado R$" + value + " na sua conta -- Agencia: " + agency, "confirmation")
+                return app.redirect("/deposit")
+        flash("Essa conta não existe!!","alert")
+        return app.redirect("/deposit") 
     else:
         return render_template('login.html')
 

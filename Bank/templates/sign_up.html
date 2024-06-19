@@ -7,12 +7,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sign_up.css') }}">
 </head>
 <body>
-    {% set notification = get_flashed_messages() %}
-    {% if notification %}
-        <div class="flash_alert">
-            {{notification[0]}}
-        </div>
-    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'alert' %}
+                        <div class="flash_alert">
+                            {{ message }}
+                        </div>
+                    {% elif category == 'confirmation' %}
+                        <div class="flash_confirmation">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
     <div id="title">CBB</div>
         <div id="form_background">
             <H1>Sign Up</H1>

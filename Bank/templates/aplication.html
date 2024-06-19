@@ -12,12 +12,14 @@
         <div id="form_background">
             <H1>Opções</H1>
             <div id="form_front">
-                <p id="balance_text">Saldo</p>
-                <div id="balance_field">{{response}}</div>
+                <p id="field_text_B">Agência-Conta:</p>
+                <div id="acc_field">{{response.agency}} - {{response.account}}</div>
+                <p id="field_text">Saldo:</p>
+                <div id="balance_field">{{response.balance}}</div>
                 <form action="/transation_route">
                     <button type="submit" id="btn_transation">Transferência</button>
                 </form>
-                <form action="/deposit_route">
+                <form action="/deposit">
                     <button type="submit" id="btn_deposit">Deposito</button>
                 </form>
                 <form action="/logout">

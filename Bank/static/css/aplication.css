@@ -45,7 +45,7 @@ div#form_front{
 
 }
 
-#balance_text{
+#field_text{
     background-color: white;
     margin: 1% 30% 1% 30%;
     text-align: center;
@@ -55,8 +55,30 @@ div#form_front{
     color: rgb(0, 0, 0);
 }
 
+#field_text_B{
+    background-color: white;
+    margin: 1% 15% 1% 15%;
+    text-align: center;
+    font-size: 30px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+}
+
 div#balance_field{
-    background-color: greenyellow;
+    background-color: rgb(255, 71, 47);
+    margin: 5px;
+    text-align: center;
+    border-radius: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    padding: 5px;
+    margin-bottom: 5px;
+    color: white;
+}
+
+div#acc_field{
+    background-color: rgb(255, 71, 47);
     margin: 5px;
     text-align: center;
     border-radius: 20px;
