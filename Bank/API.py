@@ -173,7 +173,7 @@ def to_att_consortium():
                 response_list.append(bank.get_agency())
     return response_list
 
-def cadastrate(account, name, identificator,type_account):
+def register(account, name, identificator,type_account):
     data = load_data()
     registered_client = False
     if identificator not in data: #checking if the CPF/CNPJ does not exists in the file
@@ -429,13 +429,13 @@ def sign_up_manager(account, name, identificator,type_account):
         array_counts = identificator.split('@')
         name_counts = name.split('@')
         for primaryKey, nameKey in zip(array_counts,name_counts):
-            output = cadastrate(account, nameKey, primaryKey,type_account)
+            output = register(account, nameKey, primaryKey,type_account)
             list_singup.append(output)
         return app.redirect(list_singup[0])
             
                 
     else:
-        resp = cadastrate(account, name, identificator,type_account)
+        resp = register(account, name, identificator,type_account)
         if resp == "/sign_up":
             flash("Essa conta ja esta cadastrada","alert")
         return app.redirect(resp)
