@@ -529,7 +529,8 @@ def deposit(agency, account, identificator,value):
             flash("Essa conta não existe!!","alert")
             return app.redirect("/deposit") 
         except:
-            return app.redirect("/deposit") 
+            flash("Essa conta não existe!!","alert")
+            return app.redirect("/home") 
     else:
         return render_template('login.html')
 
