@@ -306,18 +306,25 @@ def account_generate():
 @app.route('/')
 def login_page():
     if 'logged_in' in session:
-        return app.redirect('/home')
+        try:
+            return app.redirect('/home')
+        except:
+            return app.redirect('/logout')
+
     return render_template('login.html')
 
 @app.route('/home')
 def home():
     if 'logged_in' in session:
-        balance = ''
-        data = load_data()
-        for acc in data[session['cpf']]:
-            if acc['account'] == session['account'] and acc['agency'] == session['agency']:
-                balance = {"agency":session['agency'], "account": session['account'], "balance": acc['balance']}
-        return render_template('aplication.html', response=balance)
+        try:
+            balance = ''
+            data = load_data()
+            for acc in data[session['cpf']]:
+                if acc['account'] == session['account'] and acc['agency'] == session['agency']:
+                    balance = {"agency":session['agency'], "account": session['account'], "balance": acc['balance']}
+            return render_template('aplication.html', response=balance)
+        except:
+            return app.redirect('/')
     else:
         return render_template('login.html')
 
@@ -325,16 +332,23 @@ def home():
 def logout():
     data = load_data()
     if 'logged_in' in session:
-        for logout in range(len(data[session['cpf']])):
-            if data[session['cpf']][logout]["account"] == session['account'] and data[session['cpf']][logout]["agency"] == session['agency']:
-                data[session['cpf']][logout]["session"] = False
-                save_data(data)
-                to_att_consortium()
-        session.pop('logged_in', None)
-        session.pop('cpf', None)
-        session.pop('account', None)
-        session.pop('agency', None)
-        return render_template('login.html')
+        try:
+            for logout in range(len(data[session['cpf']])):
+                if data[session['cpf']][logout]["account"] == session['account'] and data[session['cpf']][logout]["agency"] == session['agency']:
+                    data[session['cpf']][logout]["session"] = False
+                    save_data(data)
+                    to_att_consortium()
+            session.pop('logged_in', None)
+            session.pop('cpf', None)
+            session.pop('account', None)
+            session.pop('agency', None)
+            return render_template('login.html')
+        except:
+            session.pop('logged_in', None)
+            session.pop('cpf', None)
+            session.pop('account', None)
+            session.pop('agency', None)
+            return render_template('login.html')
     else:
         return render_template('login.html')
 
@@ -345,32 +359,39 @@ def login():
     account = request.form.get('account')
     password = request.form.get('password')
     data = load_data()
-    for itarator in data:
-        pass_password = generate_password(itarator)
-        if pass_password == password:#check if the primarykey transformation generate this password
-            for check in data[itarator]:
-                if check['account'] == account and check['agency'] == agency and check['session'] == False:#search account
-                    session['cpf'] = itarator
-                    session['account'] = check['account'] 
-                    session['agency'] = check["agency"]
-                    session['logged_in'] = True
-                    for index in range(len(data[itarator])):
-                        if data[itarator][index]['account'] == account and data[itarator][index]['agency'] == agency:
-                            data[itarator][index]['session'] = True
-                            save_data(data)
-                            to_att_consortium()
-                    return app.redirect('/home')
-                elif check['session'] == True:
-                    flash("Esta conta ja se encontra logada em outro dispositivo!!!","alert")
-    flash("Conta, agência ou senha invalidos!!!","alert")
-    return app.redirect('/')
+    try:
+        for itarator in data:
+            pass_password = generate_password(itarator)
+            if pass_password == password:#check if the primarykey transformation generate this password
+                for check in data[itarator]:
+                    if check['account'] == account and check['agency'] == agency and check['session'] == False:#search account
+                        session['cpf'] = itarator
+                        session['account'] = check['account'] 
+                        session['agency'] = check["agency"]
+                        session['logged_in'] = True
+                        for index in range(len(data[itarator])):
+                            if data[itarator][index]['account'] == account and data[itarator][index]['agency'] == agency:
+                                data[itarator][index]['session'] = True
+                                save_data(data)
+                                to_att_consortium()
+                        return app.redirect('/home')
+                    elif check['session'] == True:
+                        flash("Esta conta ja se encontra logada em outro dispositivo!!!","alert")
+                        return app.redirect('/')
+        flash("Conta, agência ou senha invalidos!!!","alert")
+        return app.redirect('/')
+    except:
+        return app.redirect('/')
 
 #route to atualizate the consortium data for the others banks
 @app.route('/from_att_consortium')
 def from_att_consortium():
-    data = request.get_json() #receive post menssages from the others banks
-    save_data(data)
-    return bank.get_agency()
+    try:
+        data = request.get_json() #receive post menssages from the others banks
+        save_data(data)
+        return bank.get_agency()
+    except:
+        return app.redirect('/')
 
 @app.route('/sign_up')
 def sign_up():
@@ -379,66 +400,74 @@ def sign_up():
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
-    name = request.form.get('client')
-    agency = request.form.get('agency')
-    identifier = request.form.get('identifier')
-    if identifier == "cpf":
-        cpf = request.form.get('cpf')
-        type_account = request.form.get('type_account')
-        if type_account == "CC":
-            cpf_cc = cpf
-            aux_cpf = request.form.get('cpf1')
-            aux_name = request.form.get('client1')
-            index = 1
-            while aux_cpf != None:
-                cpf_cc = cpf_cc+'@'+aux_cpf
-                name = name+'@'+aux_name
-                index += 1
-                aux_cpf = request.form.get('cpf'+str(index))  
-            account = account_generate()
-            return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cpf_cc+"/"+type_account)
+    try:
+        name = request.form.get('client')
+        agency = request.form.get('agency')
+        identifier = request.form.get('identifier')
+        if identifier == "cpf":
+            cpf = request.form.get('cpf')
+            type_account = request.form.get('type_account')
+            if type_account == "CC":
+                cpf_cc = cpf
+                aux_cpf = request.form.get('cpf1')
+                aux_name = request.form.get('client1')
+                index = 1
+                while aux_cpf != None:
+                    cpf_cc = cpf_cc+'@'+aux_cpf
+                    name = name+'@'+aux_name
+                    index += 1
+                    aux_cpf = request.form.get('cpf'+str(index))  
+                account = account_generate()
+                return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cpf_cc+"/"+type_account)
+            else:
+                account = account_generate()
+                return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cpf+"/"+type_account)
         else:
+            cnpj = request.form.get('cnpj')
             account = account_generate()
-            return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cpf+"/"+type_account)
-    else:
-        cnpj = request.form.get('cnpj')
-        account = account_generate()
-        return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cnpj+"/PJ")
+            return app.redirect("http://"+agency+':9985/sign_up/'+account+"/"+name+"/"+cnpj+"/PJ")
+    except:
+        return app.redirect("/")
 
 @app.route("/account_information/<data>")
 def account_information_singup(data):
-    response = Response(
-        data,
-        content_type='text/plain',
-    )
-    # Nome do arquivo sugerido para download
-    response.headers['Content-Disposition'] = 'attachment; filename=account_information.txt'
+    try:
+        response = Response(
+            data,
+            content_type='text/plain',
+        )
+        # Nome do arquivo sugerido para download
+        response.headers['Content-Disposition'] = 'attachment; filename=account_information.txt'
 
-    return response
+        return response
+    except:
+        return app.redirect("/")
 
 #create new account route
 @app.route('/sign_up/<account>/<name>/<identificator>/<type_account>')
 def sign_up_manager(account, name, identificator,type_account):
     list_singup = []
-    if type_account == "CC":
-        for users in bank.get_joints():
-            if users == identificator:
+    try:
+        if type_account == "CC":
+            for users in bank.get_joints():
+                if users == identificator:
+                    flash("Essa conta ja esta cadastrada","alert")
+                    return app.redirect("/sign_up")
+            bank.set_joints(identificator)
+            array_counts = identificator.split('@')
+            name_counts = name.split('@')
+            for primaryKey, nameKey in zip(array_counts,name_counts):
+                output = register(account, nameKey, primaryKey,type_account)
+                list_singup.append(output)
+            return app.redirect(list_singup[0])
+         
+        else:
+            resp = register(account, name, identificator,type_account)
+            if resp == "/sign_up":
                 flash("Essa conta ja esta cadastrada","alert")
-                return app.redirect("/sign_up")
-        bank.set_joints(identificator)
-        array_counts = identificator.split('@')
-        name_counts = name.split('@')
-        for primaryKey, nameKey in zip(array_counts,name_counts):
-            output = register(account, nameKey, primaryKey,type_account)
-            list_singup.append(output)
-        return app.redirect(list_singup[0])
-            
-                
-    else:
-        resp = register(account, name, identificator,type_account)
-        if resp == "/sign_up":
-            flash("Essa conta ja esta cadastrada","alert")
-        return app.redirect(resp)
+            return app.redirect(resp)
+    except:
+        render_template("sign_up.html")
 
 @app.route("/aplication_back")
 def aplication_back():
@@ -458,43 +487,49 @@ def deposit_route():
 @app.route("/deposit_route", methods=['POST'])
 def deposit_middleware(): 
     if 'logged_in' in session:
-        account = request.form.get('account')
-        
-        document = request.form.get('identifier')
-        if document == "cpf":
-            identifier = request.form.get('cpf')
-        else:
-            identifier = request.form.get('cnpj')
-        value = request.form.get('value')
-        data = load_data()
-        for client in data[identifier]:
-            if client["agency"] == session['agency'] and client["account"] == account:
-                return app.redirect("/deposit/"+client["agency"]+"/"+account+"/"+identifier+"/"+value)
+        try:
+            account = request.form.get('account')
+            
+            document = request.form.get('identifier')
+            if document == "cpf":
+                identifier = request.form.get('cpf')
             else:
-                pass
-        flash("Essa conta não existe!!","alert")
-        return app.redirect("/deposit")
+                identifier = request.form.get('cnpj')
+            value = request.form.get('value')
+            data = load_data()
+            for client in data[identifier]:
+                if client["agency"] == session['agency'] and client["account"] == account:
+                    return app.redirect("/deposit/"+client["agency"]+"/"+account+"/"+identifier+"/"+value)
+                else:
+                    pass
+            flash("Essa conta não existe!!","alert")
+            return app.redirect("/deposit")
+        except:
+            return app.redirect("/deposit")
     else:
         return render_template('login.html')
 
 @app.route("/deposit/<agency>/<account>/<identificator>/<value>")
 def deposit(agency, account, identificator,value):
     if 'logged_in' in session:
-        data = load_data()
-        for acc in range(0,len(data[identificator])):
-            in_data = data[identificator][acc] #banks account getter 
-            #verify if a client is the targent searched
-            if (in_data['agency'] == agency) and (in_data['account'] == account):
-                data[identificator][acc]['balance'] = int(in_data['balance']) + int(value)
-                if in_data['type'] == "CC":
-                    data = look_for_joint_account(agency, account,'balance',data[identificator][acc]['balance'])
+        try:
+            data = load_data()
+            for acc in range(0,len(data[identificator])):
+                in_data = data[identificator][acc] #banks account getter 
+                #verify if a client is the targent searched
+                if (in_data['agency'] == agency) and (in_data['account'] == account):
+                    data[identificator][acc]['balance'] = int(in_data['balance']) + int(value)
+                    if in_data['type'] == "CC":
+                        data = look_for_joint_account(agency, account,'balance',data[identificator][acc]['balance'])
 
-                save_data(data)
-                to_att_consortium()
-                flash("Foi depoisitado R$" + value + " na sua conta -- Agencia: " + agency, "confirmation")
-                return app.redirect("/deposit")
-        flash("Essa conta não existe!!","alert")
-        return app.redirect("/deposit") 
+                    save_data(data)
+                    to_att_consortium()
+                    flash("Foi depoisitado R$" + value + " na sua conta -- Agencia: " + agency, "confirmation")
+                    return app.redirect("/deposit")
+            flash("Essa conta não existe!!","alert")
+            return app.redirect("/deposit") 
+        except:
+            return app.redirect("/deposit") 
     else:
         return render_template('login.html')
 
@@ -502,39 +537,44 @@ def deposit(agency, account, identificator,value):
 def check_balance(from_identificator,from_agency, from_account, 
                               to_identificator, to_agency, to_account, value):
     if 'logged_in' in session:
-        data = load_data()
-        for client in data[from_identificator]:
-            if client['account'] == from_account:
-                balance = int(client['balance']) - int(value)
-                if balance >= 0 and client['status'] == 'Unlocked':
-                    for search in range(len(data[from_identificator])):
-                        if data[from_identificator][search]['account'] == from_account:
-                            data[from_identificator][search]['status'] = "Locked"
-                            if data[from_identificator][search]['type'] == "CC":
-                                data = look_for_joint_account(from_agency, from_account,'status','Locked')
-                                save_data(data)
-                    save_data(data)
-                    return send_value_to_destination(from_identificator,from_agency, from_account, 
-                                to_identificator, to_agency, to_account, value)
-                elif client['status'] == "Locked":
-                    new_transaction = {
-                        'from_identificator': from_identificator,
-                        'from_agency': from_agency,
-                        'from_account': from_account,
-                        'to_identificator': to_identificator,
-                        'to_agency': to_agency,
-                        'to_account': to_account,
-                        'value': value
-                    }
-            
-                    bank.set_transaction_queue(new_transaction)
-                    return send_value_to_destination(from_identificator,from_agency, from_account, 
-                                to_identificator, to_agency, to_account, value)
-                else:
-                    return "Saldo insuficiente!!"
-        return "Destino não encontrado!"
+        try:
+            data = load_data()
+            for client in data[from_identificator]:
+                if client['account'] == from_account:
+                    balance = int(client['balance']) - int(value)
+                    if balance >= 0 and client['status'] == 'Unlocked':
+                        for search in range(len(data[from_identificator])):
+                            if data[from_identificator][search]['account'] == from_account:
+                                data[from_identificator][search]['status'] = "Locked"
+                                if data[from_identificator][search]['type'] == "CC":
+                                    data = look_for_joint_account(from_agency, from_account,'status','Locked')
+                                    save_data(data)
+                        save_data(data)
+                        return send_value_to_destination(from_identificator,from_agency, from_account, 
+                                    to_identificator, to_agency, to_account, value)
+                    elif client['status'] == "Locked":
+                        new_transaction = {
+                            'from_identificator': from_identificator,
+                            'from_agency': from_agency,
+                            'from_account': from_account,
+                            'to_identificator': to_identificator,
+                            'to_agency': to_agency,
+                            'to_account': to_account,
+                            'value': value
+                        }
+                
+                        bank.set_transaction_queue(new_transaction)
+                        return send_value_to_destination(from_identificator,from_agency, from_account, 
+                                    to_identificator, to_agency, to_account, value)
+                    else:
+                        return "Saldo insuficiente!!"
+            return "Destino não encontrado!"
+        except:
+            return app.redirect("/") 
     else:
         return render_template('login.html')
+
+
 if __name__ == "__main__":
     bank = bank("A")
     run_simple(IP, 9985, app)
